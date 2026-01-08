@@ -25,7 +25,6 @@ export function CameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
         videoRef,
     } = useCamera();
 
-    // Video yüklendiğinde true olacak
     const [videoReady, setVideoReady] = useState(false);
 
     useEffect(() => {
@@ -39,15 +38,24 @@ export function CameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
         }
     }, [capturedImage, onCapture]);
 
-    // Video metadata yüklendiğinde çağrılır
     const handleVideoReady = () => {
         setVideoReady(true);
     };
 
     return (
-        <div className="fixed inset-0 bg-black z-50 flex flex-col">
-            {/* Üst bar */}
-            <div className="flex justify-between items-center p-4 bg-black/50">
+        <div
+            className="fixed inset-0 bg-black z-50"
+            style={{
+                display: 'flex',
+                flexDirection: 'column',
+                height: '100dvh' // dynamic viewport height - mobilde daha iyi çalışır
+            }}
+        >
+            {/* Üst bar - sabit yükseklik */}
+            <div
+                className="flex-shrink-0 flex justify-between items-center p-4 bg-black/80"
+                style={{ height: '60px' }}
+            >
                 <button
                     onClick={() => {
                         stopCamera();
@@ -63,21 +71,22 @@ export function CameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
                 <div className="w-10" />
             </div>
 
-            {/* Kamera görüntüsü veya hata */}
-            <div className="flex-1 relative flex items-center justify-center">
+            {/* Kamera görüntüsü - kalan alanı kaplar */}
+            <div className="flex-1 relative overflow-hidden">
                 {error ? (
-                    <div className="text-center p-8">
-                        <div className="text-red-400 text-lg mb-4">{error}</div>
-                        <button
-                            onClick={startCamera}
-                            className="bg-blue-600 text-white px-6 py-3 rounded-lg"
-                        >
-                            Tekrar Dene
-                        </button>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="text-center p-8">
+                            <div className="text-red-400 text-lg mb-4">{error}</div>
+                            <button
+                                onClick={startCamera}
+                                className="bg-blue-600 text-white px-6 py-3 rounded-lg"
+                            >
+                                Tekrar Dene
+                            </button>
+                        </div>
                     </div>
                 ) : (
                     <>
-                        {/* Video elementi */}
                         <video
                             ref={videoRef}
                             autoPlay
@@ -85,12 +94,11 @@ export function CameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
                             muted
                             onLoadedMetadata={handleVideoReady}
                             onPlay={handleVideoReady}
-                            className="w-full h-full object-cover"
+                            className="absolute inset-0 w-full h-full object-cover"
                         />
 
-                        {/* Yükleniyor göstergesi */}
                         {!videoReady && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-black/80">
+                            <div className="absolute inset-0 flex items-center justify-center bg-black">
                                 <div className="text-center">
                                     <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
                                     <p className="text-white">Kamera açılıyor...</p>
@@ -99,18 +107,24 @@ export function CameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
                         )}
 
                         {/* Kılavuz çerçevesi */}
-                        <div className="absolute inset-8 border-2 border-white/50 rounded-lg pointer-events-none">
-                            <div className="absolute top-0 left-0 w-8 h-8 border-l-4 border-t-4 border-white rounded-tl-lg" />
-                            <div className="absolute top-0 right-0 w-8 h-8 border-r-4 border-t-4 border-white rounded-tr-lg" />
-                            <div className="absolute bottom-0 left-0 w-8 h-8 border-l-4 border-b-4 border-white rounded-bl-lg" />
-                            <div className="absolute bottom-0 right-0 w-8 h-8 border-r-4 border-b-4 border-white rounded-br-lg" />
+                        <div className="absolute inset-4 md:inset-8 border-2 border-white/50 rounded-lg pointer-events-none">
+                            <div className="absolute top-0 left-0 w-6 h-6 border-l-4 border-t-4 border-white rounded-tl-lg" />
+                            <div className="absolute top-0 right-0 w-6 h-6 border-r-4 border-t-4 border-white rounded-tr-lg" />
+                            <div className="absolute bottom-0 left-0 w-6 h-6 border-l-4 border-b-4 border-white rounded-bl-lg" />
+                            <div className="absolute bottom-0 right-0 w-6 h-6 border-r-4 border-b-4 border-white rounded-br-lg" />
                         </div>
                     </>
                 )}
             </div>
 
-            {/* Alt bar - çekim butonu - HER ZAMAN GÖRÜNÜR */}
-            <div className="p-8 bg-black/50 flex justify-center items-center">
+            {/* Alt bar - sabit, her zaman görünür */}
+            <div
+                className="flex-shrink-0 bg-black/80 flex justify-center items-center"
+                style={{
+                    height: '120px',
+                    paddingBottom: 'env(safe-area-inset-bottom, 20px)' // iPhone notch için
+                }}
+            >
                 <button
                     onClick={capturePhoto}
                     disabled={!videoReady && !isStreaming}
@@ -118,7 +132,7 @@ export function CameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
                      flex items-center justify-center transition-all
                      ${(videoReady || isStreaming)
                             ? 'hover:scale-105 active:scale-95 opacity-100'
-                            : 'opacity-50 cursor-not-allowed'}`}
+                            : 'opacity-50'}`}
                 >
                     <div className="w-16 h-16 rounded-full bg-white border-2 border-gray-400" />
                 </button>
