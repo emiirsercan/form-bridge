@@ -2,6 +2,11 @@
  * CameraCapture Bileşeni
  * 
  * Kamera görüntüsünü gösteren ve fotoğraf çekmeyi sağlayan UI bileşeni.
+ * 
+ * LAYOUT: CSS Grid ile 3 bölüm:
+ * - Üst bar: 60px sabit
+ * - Orta (video): kalan alan
+ * - Alt bar: 140px sabit
  */
 
 "use client";
@@ -44,42 +49,72 @@ export function CameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
 
     return (
         <div
-            className="fixed inset-0 bg-black z-50"
             style={{
-                display: 'flex',
-                flexDirection: 'column',
-                height: '100dvh' // dynamic viewport height - mobilde daha iyi çalışır
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'black',
+                zIndex: 9999,
+                display: 'grid',
+                gridTemplateRows: '60px 1fr 140px',
             }}
         >
-            {/* Üst bar - sabit yükseklik */}
+            {/* ===== ÜST BAR ===== */}
             <div
-                className="flex-shrink-0 flex justify-between items-center p-4 bg-black/80"
-                style={{ height: '60px' }}
+                style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '0 16px',
+                    backgroundColor: 'rgba(0,0,0,0.8)',
+                }}
             >
                 <button
                     onClick={() => {
                         stopCamera();
                         onCancel();
                     }}
-                    className="text-white p-2 rounded-full hover:bg-white/10"
+                    style={{
+                        color: 'white',
+                        padding: '8px',
+                        borderRadius: '50%',
+                        background: 'transparent',
+                        border: 'none',
+                        cursor: 'pointer',
+                    }}
                 >
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
-                <span className="text-white text-sm">Formu çerçeveye alın</span>
-                <div className="w-10" />
+                <span style={{ color: 'white', fontSize: '14px' }}>Formu çerçeveye alın</span>
+                <div style={{ width: '40px' }} />
             </div>
 
-            {/* Kamera görüntüsü - kalan alanı kaplar */}
-            <div className="flex-1 relative overflow-hidden">
+            {/* ===== VIDEO ALANI ===== */}
+            <div style={{ position: 'relative', overflow: 'hidden' }}>
                 {error ? (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="text-center p-8">
-                            <div className="text-red-400 text-lg mb-4">{error}</div>
+                    <div style={{
+                        position: 'absolute',
+                        inset: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    }}>
+                        <div style={{ textAlign: 'center', padding: '32px' }}>
+                            <div style={{ color: '#f87171', fontSize: '18px', marginBottom: '16px' }}>{error}</div>
                             <button
                                 onClick={startCamera}
-                                className="bg-blue-600 text-white px-6 py-3 rounded-lg"
+                                style={{
+                                    backgroundColor: '#2563eb',
+                                    color: 'white',
+                                    padding: '12px 24px',
+                                    borderRadius: '8px',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                }}
                             >
                                 Tekrar Dene
                             </button>
@@ -94,49 +129,108 @@ export function CameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
                             muted
                             onLoadedMetadata={handleVideoReady}
                             onPlay={handleVideoReady}
-                            className="absolute inset-0 w-full h-full object-cover"
+                            style={{
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'cover',
+                            }}
                         />
 
                         {!videoReady && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-black">
-                                <div className="text-center">
-                                    <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-                                    <p className="text-white">Kamera açılıyor...</p>
+                            <div style={{
+                                position: 'absolute',
+                                inset: 0,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                backgroundColor: 'black',
+                            }}>
+                                <div style={{ textAlign: 'center' }}>
+                                    <div
+                                        style={{
+                                            width: '48px',
+                                            height: '48px',
+                                            border: '4px solid #3b82f6',
+                                            borderTopColor: 'transparent',
+                                            borderRadius: '50%',
+                                            margin: '0 auto 16px',
+                                            animation: 'spin 1s linear infinite',
+                                        }}
+                                    />
+                                    <p style={{ color: 'white' }}>Kamera açılıyor...</p>
                                 </div>
                             </div>
                         )}
 
-                        {/* Kılavuz çerçevesi */}
-                        <div className="absolute inset-4 md:inset-8 border-2 border-white/50 rounded-lg pointer-events-none">
-                            <div className="absolute top-0 left-0 w-6 h-6 border-l-4 border-t-4 border-white rounded-tl-lg" />
-                            <div className="absolute top-0 right-0 w-6 h-6 border-r-4 border-t-4 border-white rounded-tr-lg" />
-                            <div className="absolute bottom-0 left-0 w-6 h-6 border-l-4 border-b-4 border-white rounded-bl-lg" />
-                            <div className="absolute bottom-0 right-0 w-6 h-6 border-r-4 border-b-4 border-white rounded-br-lg" />
+                        {/* Köşe işaretleri */}
+                        <div style={{
+                            position: 'absolute',
+                            top: '16px',
+                            left: '16px',
+                            right: '16px',
+                            bottom: '16px',
+                            border: '2px solid rgba(255,255,255,0.5)',
+                            borderRadius: '8px',
+                            pointerEvents: 'none',
+                        }}>
+                            <div style={{ position: 'absolute', top: 0, left: 0, width: '24px', height: '24px', borderLeft: '4px solid white', borderTop: '4px solid white', borderTopLeftRadius: '8px' }} />
+                            <div style={{ position: 'absolute', top: 0, right: 0, width: '24px', height: '24px', borderRight: '4px solid white', borderTop: '4px solid white', borderTopRightRadius: '8px' }} />
+                            <div style={{ position: 'absolute', bottom: 0, left: 0, width: '24px', height: '24px', borderLeft: '4px solid white', borderBottom: '4px solid white', borderBottomLeftRadius: '8px' }} />
+                            <div style={{ position: 'absolute', bottom: 0, right: 0, width: '24px', height: '24px', borderRight: '4px solid white', borderBottom: '4px solid white', borderBottomRightRadius: '8px' }} />
                         </div>
                     </>
                 )}
             </div>
 
-            {/* Alt bar - sabit, her zaman görünür */}
+            {/* ===== ALT BAR - FOTOĞRAF ÇEK BUTONU ===== */}
             <div
-                className="flex-shrink-0 bg-black/80 flex justify-center items-center"
                 style={{
-                    height: '120px',
-                    paddingBottom: 'env(safe-area-inset-bottom, 20px)' // iPhone notch için
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    backgroundColor: 'rgba(0,0,0,0.8)',
+                    paddingBottom: '20px',
                 }}
             >
                 <button
                     onClick={capturePhoto}
                     disabled={!videoReady && !isStreaming}
-                    className={`w-20 h-20 rounded-full bg-white border-4 border-gray-300 
-                     flex items-center justify-center transition-all
-                     ${(videoReady || isStreaming)
-                            ? 'hover:scale-105 active:scale-95 opacity-100'
-                            : 'opacity-50'}`}
+                    style={{
+                        width: '72px',
+                        height: '72px',
+                        borderRadius: '50%',
+                        backgroundColor: 'white',
+                        border: '4px solid #d1d5db',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: (videoReady || isStreaming) ? 'pointer' : 'not-allowed',
+                        opacity: (videoReady || isStreaming) ? 1 : 0.5,
+                        transition: 'transform 0.2s',
+                    }}
                 >
-                    <div className="w-16 h-16 rounded-full bg-white border-2 border-gray-400" />
+                    <div
+                        style={{
+                            width: '60px',
+                            height: '60px',
+                            borderRadius: '50%',
+                            backgroundColor: 'white',
+                            border: '2px solid #9ca3af',
+                        }}
+                    />
                 </button>
             </div>
+
+            {/* Spin animation için global style */}
+            <style>{`
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
         </div>
     );
 }
